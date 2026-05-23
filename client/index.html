@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上多人連線射龍門</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        body {
+            background-color: #1a472a; /* 經典撲克牌桌綠色 */
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+        .hidden { display: none !important; }
+        input, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+        }
+        button {
+            background-color: #ffc107;
+            color: #111;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #e0a800; }
+        .table {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .card {
+            width: 100px;
+            height: 150px;
+            background: white;
+            color: black;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .card.red { color: red; }
+        .card.empty {
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🐉 線上多人射龍門</h1>
+
+        <div id="lobby-ui">
+            <input type="text" id="player-name" placeholder="輸入你的暱稱">
+            <input type="text" id="room-id" placeholder="輸入房間號碼">
+            <br>
+            <button id="btn-join">加入/建立房間</button>
+        </div>
+
+        <div id="game-ui" class="hidden">
+            <h3 id="room-title">房間：-</h3>
+            <p id="pool-info">💰 目前底池籌碼：0</p>
+            
+            <div class="table">
+                <div>
+                    <p>左柱</p>
+                    <div id="card-left" class="card empty">?</div>
+                </div>
+                <div>
+                    <p>你的射門</p>
+                    <div id="card-third" class="card empty">?</div>
+                </div>
+                <div>
+                    <p>右柱</p>
+                    <div id="card-right" class="card empty">?</div>
+                </div>
+            </div>
+
+            <div id="action-area">
+                <button id="btn-start" class="hidden">房主開始遊戲</button>
+                <div id="bet-controls" class="hidden">
+                    <input type="number" id="bet-amount" placeholder="輸入下注金額" min="10">
+                    <button id="btn-bet">下注射門！</button>
+                </div>
+                <p id="status-msg">等待遊戲開始...</p>
+            </div>
+
+            <h4>👥 房間玩家列表</h4>
+            <div id="player-list"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -69,7 +69,65 @@ io.on('connection', (socket) => {
             io.to(roomId).emit('room-updated', room);
         }
     });
+// 【事件 4：玩家進行下注射門】
+    socket.on('player-bet', (roomId, betAmount) => {
+        const room = rooms[roomId];
+        if (!room || !room.gameStarted) return;
 
+        const player = room.players[room.currentTurn];
+        // 確保是目前輪到的玩家才可以下注，且下注金額不能大於自己財產，也不能大於底池
+        if (player.id !== socket.id) return;
+        if (betAmount > player.chips || betAmount > room.pool) return;
+
+        // 1. 抽出第三張牌
+        room.tableCards.thirdCard = room.deck.pop();
+
+        // 2. 利用我們先前寫好的 gameLogic 來判定輸贏
+        const result = checkResult(room.tableCards.card1, room.tableCards.card2, room.tableCards.thirdCard);
+
+        // 3. 根據結果結算籌碼
+        if (result === 'win') {
+            player.chips += betAmount;  // 贏了，從底池拿走籌碼
+            room.pool -= betAmount;
+        } else if (result === 'clash') {
+            const penalty = betAmount * 2; // 撞柱！賠雙倍進底池
+            player.chips -= penalty;
+            room.pool += penalty;
+        } else {
+            player.chips -= betAmount;  // 沒中，籌碼歸底池
+            room.pool += betAmount;
+        }
+
+        console.log(`房間 [${roomId}] 玩家 [${player.name}] 下注 ${betAmount}，結果：${result}，最新底池：${room.pool}`);
+
+        // 廣播這次下注的結果給所有人
+        io.to(roomId).emit('bet-result', {
+            playerName: player.name,
+            result: result,
+            thirdCard: room.tableCards.thirdCard,
+            betAmount: betAmount
+        });
+
+        // 4. 移動到下一個玩家的輪次
+        room.currentTurn = (room.currentTurn + 1) % room.players.length;
+
+        // 5. 檢查底池如果乾了，自動重新補滿
+        if (room.pool <= 0) {
+            room.pool = room.players.length * 100;
+            room.players.forEach(p => p.chips -= 100);
+        }
+
+        // 6. 幫下一輪自動發前兩張牌
+        if (room.deck.length < 3) room.deck = shuffleDeck(createDeck()); // 牌不夠就洗新的一副
+        room.tableCards.card1 = room.deck.pop();
+        room.tableCards.card2 = room.deck.pop();
+        
+        // 延遲一下再廣播更新狀態，讓前端玩家有時間看清楚抽到的第三張牌
+        setTimeout(() => {
+            room.tableCards.thirdCard = null; // 清空第三張，準備下一輪
+            io.to(roomId).emit('room-updated', room);
+        }, 3500); // 留 3.5 秒給玩家看牌
+    }); 
     // 【事件 3：中斷連線處理】
     socket.on('disconnect', () => {
         console.log(`玩家斷開連線: ${socket.id}`);
