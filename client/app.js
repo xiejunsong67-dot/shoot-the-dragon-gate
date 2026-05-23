@@ -15,23 +15,31 @@ const statusMsg = document.getElementById('status-msg');
 let myRoomId = "";
 
 // 點擊「加入房間」按鈕
+// 點擊「加入房間」按鈕
 document.getElementById('btn-join').addEventListener('click', () => {
-    const name = document.getElementById('player-name').value;
-    const room = document.getElementById('room-id').value;
-
-    if (!name || !room) {
-        alert("請輸入暱稱與房間號碼！");
-        return;
+    const name = document.getElementById('player-name').value; //
+    const room = document.getElementById('room-id').value; //
+    
+    // ✨ 新增：抓取初始金額輸入框的值，如果沒填或不合法就給 1000
+    let initMoney = parseInt(document.getElementById('init-money').value);
+    if (isNaN(initMoney) || initMoney < 100) {
+        initMoney = 1000;
     }
 
-    myRoomId = room;
+    if (!name || !room) { //
+        alert("請輸入暱稱與房間號碼！"); //
+        return; //
+    }
+
+    myRoomId = room; //
     // 發送事件給後端：我要進房間！
-    socket.emit('join-room', room, name);
+    // ✨ 這裡多傳送第三個參數 initMoney
+    socket.emit('join-room', room, name, initMoney); //
 
     // 切換介面顯示
-    lobbyUi.classList.add('hidden');
-    gameUi.classList.remove('hidden');
-    roomTitle.innerText = `房間號碼：${room}`;
+    lobbyUi.classList.add('hidden'); //
+    gameUi.classList.remove('hidden'); //
+    roomTitle.innerText = `房間號碼 : ${room}`; //
 });
 
 // 點擊「房主開始遊戲」按鈕

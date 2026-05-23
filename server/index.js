@@ -23,33 +23,39 @@ io.on('connection', (socket) => {
     console.log(`有新玩家連線，Socket ID: ${socket.id}`);
 
     // 【事件 1：建立或加入房間】
-    socket.on('join-room', (roomId, playerName) => {
-        socket.join(roomId);
+    // ✨ 加上第三個參數 initMoney
+    socket.on('join-room', (roomId, playerName, initMoney) => {
+        socket.join(roomId); //
 
         // 如果房間不存在，就初始化一個新房間
-        if (!rooms[roomId]) {
-            rooms[roomId] = {
-                id: roomId,
-                players: [],
+        if (!rooms[roomId]) { //
+            rooms[roomId] = { //
+                id: roomId, //
+                players: [], //
                 deck: shuffleDeck(createDeck()), // 初始化一整副洗好的牌
-                gameStarted: false,
-                currentTurn: 0,
-                pool: 0,                         // 底池籌碼
-                tableCards: { card1: null, card2: null, thirdCard: null }
-            };
-        }
+                gameStarted: false, //
+                currentTurn: 0, //
+                pool: 0, // 底池籌碼
+                tableCards: { card1: null, card2: null, thirdCard: null }, //
+                // ✨ 紀錄這間房間的初始金額設定（由第一個建立房間的房主決定）
+                roomInitMoney: initMoney || 1000
+            }; //
+        } //
 
-        // 把玩家資訊塞進房間裡
-        rooms[roomId].players.push({
+        // 建立新玩家物件
+        const newPlayer = {
             id: socket.id,
             name: playerName,
-            chips: 1000 // 每個玩家預設 1000 籌碼
-        });
+            // ✨ 讓每個玩家加入時，自動獲得這間房間設定的初始籌碼！
+            // 💡 提示：如果你原本前端渲染畫面時，籌碼變數是叫 money，請將下面的 chips 改成 money
+            chips: rooms[roomId].roomInitMoney 
+        };
 
-        console.log(`玩家 [${playerName}] 加入了房間 [${roomId}]`);
+        rooms[roomId].players.push(newPlayer); //
+        console.log(`玩家 [${playerName}] 加入了房間 [${roomId}]，獲得初始籌碼：${newPlayer.chips}`); //
 
-        // 將最新房間狀態廣播給房間裡的所有人
-        io.to(roomId).emit('room-updated', rooms[roomId]);
+        // 廣播最新房間狀態給所有人
+        io.to(roomId).emit('room-updated', rooms[roomId]); //
     });
 
     // 【事件 2：房主點擊開始遊戲】

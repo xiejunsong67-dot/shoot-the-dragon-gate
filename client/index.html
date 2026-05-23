@@ -72,48 +72,171 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>🐉 線上多人射龍門</h1>
-
-        <div id="lobby-ui">
-            <input type="text" id="player-name" placeholder="輸入你的暱稱">
-            <input type="text" id="room-id" placeholder="輸入房間號碼">
-            <br>
-            <button id="btn-join">加入/建立房間</button>
+    <div class="main-layout">
+        
+        <div class="rules-sidebar">
+            <h2>📜 遊戲規則</h2>
+            <hr>
+            <p><b>核心玩法：</b>系統會先發左右兩張牌（門柱），下注後開出第三張牌（射門）。</p>
+            <ul>
+                <li><span style="color: #4caf50;">●</span> <b>過關：</b>第三張牌點數落在前兩張牌<b>中間</b>。贏得下注籌碼！</li>
+                <li><span style="color: #f44336;">●</span> <b>沒中：</b>點數超出前兩張牌範圍。輸掉下注籌碼！</li>
+                <li><span style="color: #ff9800;">●</span> <b>💥 撞柱：</b>點數跟前兩張牌的其中一張<b>一模一樣</b>。判定大輸，<b>慘賠雙倍籌碼</b>進底池！</li>
+            </ul>
+            <p><b>牌面大小：</b><br>2 &lt; 3 &lt; 4 ... &lt; J &lt; Q &lt; K &lt; A</p>
         </div>
 
-        <div id="game-ui" class="hidden">
-            <h3 id="room-title">房間：-</h3>
-            <p id="pool-info">💰 目前底池籌碼：0</p>
-            
-            <div class="table">
-                <div>
-                    <p>左柱</p>
-                    <div id="card-left" class="card empty">?</div>
-                </div>
-                <div>
-                    <p>你的射門</p>
-                    <div id="card-third" class="card empty">?</div>
-                </div>
-                <div>
-                    <p>右柱</p>
-                    <div id="card-right" class="card empty">?</div>
-                </div>
+        <div class="container">
+            <h1>🐉 線上多人射門</h1>
+
+            <div id="lobby-ui">
+                <input type="text" id="player-name" placeholder="輸入你的暱稱">
+                <input type="text" id="room-id" placeholder="輸入房間號碼">
+                <input type="number" id="init-money" placeholder="初始金額" value="1000" min="100" style="width: 150px; padding: 10px; margin: 5px; border-radius: 5px; border: none;">
+                <br>
+                <button id="btn-join">加入/建立房間</button>
             </div>
 
-            <div id="action-area">
-                <button id="btn-start" class="hidden">房主開始遊戲</button>
-                <div id="bet-controls" class="hidden">
-                    <input type="number" id="bet-amount" placeholder="輸入下注金額" min="10">
-                    <button id="btn-bet">下注射門！</button>
+            <div id="game-ui" class="hidden">
+                <h3 id="room-title">房間：-</h3>
+                <p id="pool-info">💰 目前底池籌碼：0</p>
+                
+                <div class="table">
+                    <div>
+                        <p>左柱</p>
+                        <div id="card-left" class="card empty">?</div>
+                    </div>
+                    <div>
+                        <p>你的射門</p>
+                        <div id="card-third" class="card empty">?</div>
+                    </div>
+                    <div>
+                        <p>右柱</p>
+                        <div id="card-right" class="card empty">?</div>
+                    </div>
                 </div>
-                <p id="status-msg">等待遊戲開始...</p>
-            </div>
 
-            <h4>👥 房間玩家列表</h4>
-            <div id="player-list"></div>
+                <div id="action-area">
+                    <button id="btn-start" class="hidden">房主開始遊戲</button>
+                    <div id="bet-controls" class="hidden">
+                        <input type="number" id="bet-amount" placeholder="輸入下注金額" min="10">
+                        <button id="btn-bet">下注射門！</button>
+                    </div>
+                    <p id="status-msg">等待遊戲開始...</p>
+                </div>
+
+                <h4>👥 房間玩家列表</h4>
+                <div id="player-list"></div>
+            </div>
         </div>
+
     </div>
+
+    <style>
+        body {
+            background-color: #1a472a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        /* 大外框：讓規則和遊戲桌並排，且置中 */
+        .main-layout {
+            display: flex;
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+            align-items: flex-start;
+        }
+        /* 左側規則欄樣式 */
+        .rules-sidebar {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border-left: 5px solid #ffc107; /* 醒目的黃色左邊條 */
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .rules-sidebar h2 {
+            margin-top: 0;
+            color: #ffc107;
+            font-size: 20px;
+        }
+        .rules-sidebar hr {
+            border: 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 15px;
+        }
+        .rules-sidebar ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        .rules-sidebar li {
+            margin-bottom: 8px;
+            list-style: none; /* 拿掉預設黑點 */
+            position: relative;
+        }
+        /* 右側遊戲桌樣式（維持原本，稍微調權重） */
+        .container {
+            flex: 1.5;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .hidden { display: none !important; }
+        input, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #ffc107;
+            color: #111;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #e0a800; }
+        .table {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .card {
+            width: 100px;
+            height: 150px;
+            background: white;
+            color: black;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            white-space: pre-line; /* 讓換行符號生效 */
+        }
+        .card.red { color: red; }
+        .card.empty {
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
 
     <script src="app.js"></script>
 </body>
